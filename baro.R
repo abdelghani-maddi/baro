@@ -176,7 +176,15 @@ df %>%
   separate_p_footnotes()
 
 
+# Comparer les clusters
+df$id <- rownames(df)
+
+df$typo <- paste0("Cluster",df$typo)
 
 
+# Créer un tableau croisé avec pivot_wider()
+table_croisee <- df %>%
+  count(typo, typo2_recod) %>%
+  pivot_wider(names_from = typo2_recod, values_from = n, values_fill = 0)
 
 
