@@ -75,7 +75,7 @@ df <- data %>%
   select(sexe, catage, ends_with("recod"), score1, scor_q9_i, interet_science, `q22_i3. Dans quelle mesure êtes-vous d'accord ou non avec ces propositions ? - Je préfère échanger avec des personnes qui partagent mes opinions`, `rs4. Quels sont aujourd'hui vos principaux centres d'intérêt ? - Au Total / Les sciences`, `q8. Quelles sont vos principales sources d'informations sur des sujets scientifiques ? / Vous ne vous informez pas sur des sujets scientifiques`) %>%
   select(-starts_with("att"), -starts_with("desc"))
 
-names(df) <- c("sexe", "catage", "diplome_recod", "position_recod", "revfoyer_recod", "sourceinfo_recod", "typo2_recod",
+names(df) <- c("sexe", "catage", "diplome_recod", "position_recod", "revfoyer_recod", "sourceinfo_recod", 
                "score1", "scor_freq_activ_sci", "interet_science", "echang_meme_opinions", "centr_intert_scien", "pas_info_sujets_sci")
 
 
