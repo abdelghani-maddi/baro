@@ -7,9 +7,8 @@ library(ade4)
 library(factoextra)
 library(explor)
 library(questionr)
-library(FactoMineR)
+library(FactoMineR) # pas nécessaire comme j'ai utilisé ade4
 library(readxl)
-library(ade4)
 library(dendextend)
 library(gtsummary)
 
