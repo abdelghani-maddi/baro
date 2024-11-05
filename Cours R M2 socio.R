@@ -76,7 +76,53 @@ gglikert(df_baro, include = IA_Presse:IA_Traitement)
 
 
 
+library(labelled)
+niveaux <- c(
+  "Pas du tout d'accord",
+  "Plutôt pas d'accord",
+  "Ni d'accord, ni pas d'accord",
+  "Plutôt d'accord",
+  "Tout à fait d'accord"
+)
+set.seed(42)
+df <-
+  tibble(
+    groupe = sample(c("A", "B"), 150, replace = TRUE),
+    q1 = sample(niveaux, 150, replace = TRUE),
+    q2 = sample(niveaux, 150, replace = TRUE, prob = 5:1),
+    q3 = sample(niveaux, 150, replace = TRUE, prob = 1:5),
+    q4 = sample(niveaux, 150, replace = TRUE, prob = 1:5),
+    q5 = sample(c(niveaux, NA), 150, replace = TRUE),
+    q6 = sample(niveaux, 150, replace = TRUE, prob = c(1, 0, 1, 1, 0))
+  ) |> 
+  mutate(across(q1:q6, ~ factor(.x, levels = niveaux))) |> 
+  set_variable_labels(
+    q1 = "Première question",
+    q2 = "Seconde question",
+    q3 = "Troisième question",
+    q4 = "Quatrième question",
+    q5 = "Cinquième question",
+    q6 = "Sixième question"
+  )
+
+library(gtsummary)
+df |> 
+  tbl_summary(include = q1:q6)
 
 
+df |> 
+  tbl_likert(
+    include = q1:q6
+  )
 
 
+library(ggstats)
+df |> 
+  gglikert(
+    include = q1:q6,
+    totals_include_center = TRUE,
+    sort = "ascending"
+  ) +
+  guides(
+    fill = guide_legend(nrow = 2)
+  )
