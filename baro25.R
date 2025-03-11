@@ -13,6 +13,10 @@ library(readxl)
 library(GGally)     # Pour des graphiques de corrélations et autres visualisations
 library(effects)    # Pour calculer et visualiser les effets marginaux
 library(ggeffects)  # Pour visualiser les effets marginaux des modèles
+library(ggridges)
+library(viridisLite)
+library(viridis)
+library(hrbrthemes)
 
 
 # Les data ----
@@ -38,16 +42,6 @@ baro_enq2 <- baro25 %>% # Enquête 2
          diplome, autopol)
 
 names(baro_enq2) <- c("num", "id", "poids", "scoreatt", "scoreali", "scoreesprit", "region", "habitat", "genre", "age", "csp", "revenu", "diplome", "autopol")   
-
-
-# Explorer les données -----
-
-baro_enq1 %>%
-  select(-num, -id, -poids) %>%
-  tbl_summary()
-
-# Analyse des données -----
-## Régression -----
 
 
 ## Reordering baro_enq1$csp
@@ -135,11 +129,57 @@ baro_enq1$region <- baro_enq1$region %>%
     "Provence - Alpes - Côte d'Azur"
   )
 
+## Reordering baro_enq1$age
+baro_enq1$age <- baro_enq1$age %>%
+  fct_relevel(
+    "18-20", "21-24", "25-34", "35-49", "50-64", "65+"
+  )
 
 baro_enq1 <- na.omit(baro_enq1)
 
-###########################################
 
+# Explorer les données -----
+
+baro_enq1 %>%
+  select(-num, -id, -poids) %>%
+  tbl_summary()
+
+# Explo
+
+# Plot
+ggplot(baro_enq1, aes(x = scoreali, y = age, fill = ..x..)) +
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
+  scale_fill_viridis(name = "Score", option = "C") +
+  labs(title = 'Score Science' ) +
+  theme_ipsum() +
+  theme(
+    legend.position="none",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 8)
+  )
+
+
+# Plot
+ggplot(baro_enq1, aes(x = scoreali, y = autopol, fill = ..x..)) +
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
+  scale_fill_viridis(name = "Score", option = "C") +
+  labs(title = 'Score Science' ) +
+  theme_ipsum() +
+  theme(
+    legend.position="none",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 8)
+  )
+
+# From the help page:
+ggpairs(baro_enq1, columns = 4:6, ggplot2::aes(colour=genre)) 
+
+# Analyse des données -----
+## Régression -----
+
+
+###########################################
+# Analyse de scoreatt
 ###########################################
 
 
@@ -167,6 +207,85 @@ ggcoef_compare(
   exponentiate = TRUE,
   type = "f"
 )
+
+# mult
+
+car::vif(reg_att1)
+car::vif(reg_att1V2)
+
+
+
+###########################################
+# Analyse de scoreali
+###########################################
+
+
+reg_ali1 <- glm(scoreali ~ scoreatt + scoreesprit + genre + age + autopol + revenu + habitat +  csp + diplome + region,
+                family = gaussian,
+                data = baro_enq1,
+                weights = poids
+)
+
+reg_ali1 %>%
+  tbl_regression() %>%
+  add_global_p()
+
+# Visualisation des coefficients avec ggcoef_model
+ggcoef_model(reg_att1, exponentiate = TRUE)
+
+
+# Validation pas à pas
+reg_aliV2 <-  step(reg_ali1)
+
+
+# Comparaison entre le modèle complet et le modèle simplifié
+ggcoef_compare(
+  list("modèle complet" = reg_ali1, "modèle simplifié" = reg_aliV2),
+  exponentiate = TRUE,
+  type = "f"
+)
+
+# mult
+
+car::vif(reg_ali1)
+car::vif(reg_aliV2)
+
+
+###########################################
+# Analyse de scoreatt
+###########################################
+
+
+reg_esprit1 <- glm(scoreesprit ~ scoreatt + scoreali + genre + age + autopol + revenu + habitat +  csp + diplome + region,
+                family = gaussian,
+                data = baro_enq1,
+                weights = poids
+)
+
+reg_esprit1 %>%
+  tbl_regression() %>%
+  add_global_p()
+
+# Visualisation des coefficients avec ggcoef_model
+ggcoef_model(reg_esprit1, exponentiate = TRUE)
+
+
+# Validation pas à pas
+reg_espritV2 <-  step(reg_esprit1)
+
+
+# Comparaison entre le modèle complet et le modèle simplifié
+ggcoef_compare(
+  list("modèle complet" = reg_esprit1, "modèle simplifié" = reg_espritV2),
+  exponentiate = TRUE,
+  type = "f"
+)
+
+# mult
+
+car::vif(reg_esprit1)
+car::vif(reg_espritV2)
+
 
 
 
